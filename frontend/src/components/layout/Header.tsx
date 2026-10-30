@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 const NAV_LINKS = [
   { to: '/', label: 'Home', exact: true },
   { to: '/fact-check', label: 'Fact Check' },
-  { to: '/explore', label: 'Anatomy' },
+  { to: '/explore', label: 'Anatomy', hidden: true },
   { to: '/learn', label: 'Learn' },
   { to: '/history', label: 'History' },
   { to: '/about', label: 'About' },
@@ -33,7 +33,7 @@ export function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter((link) => !link.hidden).map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
@@ -76,7 +76,7 @@ export function Header() {
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <nav className="px-4 py-3 space-y-1" aria-label="Mobile navigation">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter((link) => !link.hidden).map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
