@@ -17,6 +17,9 @@ const AnatomyViewer = lazy(() =>
   import('@/components/anatomy/AnatomyViewer').then((m) => ({ default: m.AnatomyViewer }))
 );
 
+// Anatomy section is temporarily hidden; set to true to bring it back.
+const SHOW_ANATOMY = false;
+
 const FEATURES = [
   {
     icon: <Search className="w-5 h-5" />,
@@ -32,6 +35,7 @@ const FEATURES = [
     icon: <Brain className="w-5 h-5" />,
     title: 'Interactive Anatomy',
     desc: 'Explore the human body in 3D. Click any organ to learn its function, conditions, and evidence-based facts.',
+    hidden: !SHOW_ANATOMY,
   },
   {
     icon: <BookOpen className="w-5 h-5" />,
@@ -66,7 +70,7 @@ export function HomePage() {
     <div className="overflow-hidden">
       {/* Hero section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 lg:pt-16 lg:pb-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className={`grid gap-12 items-center ${SHOW_ANATOMY ? 'lg:grid-cols-2' : 'max-w-2xl mx-auto'}`}>
           {/* Left: claim input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -107,6 +111,7 @@ export function HomePage() {
           </motion.div>
 
           {/* Right: 3D anatomy preview */}
+          {SHOW_ANATOMY && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -144,6 +149,7 @@ export function HomePage() {
             </div>
             <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">Click an organ to learn more</p>
           </motion.div>
+          )}
         </div>
       </section>
 
@@ -153,8 +159,8 @@ export function HomePage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-10">
             Evidence-based. Transparent. Honest.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {FEATURES.map((f) => (
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${SHOW_ANATOMY ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
+            {FEATURES.filter((f) => !f.hidden).map((f) => (
               <Card key={f.title} className="hover:shadow-card-md transition-shadow">
                 <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 mb-3">
                   {f.icon}

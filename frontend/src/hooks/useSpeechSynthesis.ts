@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const DEVANAGARI = / 
-
-
-/;
+const DEVANAGARI = /[ऀ-ॿ]/;
 
 // Chrome stops long utterances after ~15 seconds, so speech is queued sentence by sentence.
 function splitIntoChunks(text: string): string[] {
