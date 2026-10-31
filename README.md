@@ -49,9 +49,6 @@ If you delete `backend/truthmed.db`, it is re-created and re-seeded on the next 
 
 ```powershell
 Copy-Item .env.example backend\.env
-```
-
-Get an API key at: https://console.anthropic.com
 
 > Without a real API key, the fact-checker returns a "not configured" message instead of an analysis. The anatomy explorer works without any API key.
 
