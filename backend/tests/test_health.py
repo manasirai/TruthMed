@@ -6,5 +6,5 @@ def test_health(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "ok"
-    assert "anthropic_configured" in data
+    assert "analysis_configured" in data
     assert "retrieval_configured" in data

@@ -43,5 +43,5 @@ export const api = {
       }),
   },
 
-  health: () => request<{ status: string; anthropic_configured: boolean; retrieval_configured: boolean }>('/health'),
+  health: () => request<{ status: string; analysis_configured: boolean; retrieval_configured: boolean }>('/health'),
 };

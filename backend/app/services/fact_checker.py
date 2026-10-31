@@ -169,13 +169,13 @@ async def run_fact_check(claim: str) -> FactCheckPipelineResult:
             verdict="insufficient_evidence",
             verdict_label="API Key Not Configured",
             claim_type="other",
-            short_answer="The Anthropic API key is not configured. Please add ANTHROPIC_API_KEY to your .env file.",
+            short_answer="The analysis service is not configured. Please contact the site administrator.",
             what_evidence_says="Analysis unavailable — API key missing.",
-            why_accurate_or_not="Configure the API key to enable AI-powered analysis.",
+            why_accurate_or_not="The analysis service must be configured to enable analysis.",
             supporting_evidence="Unavailable.",
             contradicting_evidence="Unavailable.",
-            missing_context="Add ANTHROPIC_API_KEY to backend/.env to enable real analysis.",
-            what_to_do_next="Configure the backend environment variable ANTHROPIC_API_KEY.",
+            missing_context="Analysis service configuration is missing.",
+            what_to_do_next="Please try again later.",
             when_to_seek_care="For any health concern, consult a qualified medical professional.",
             sources=[],
             retrieval_status="not_attempted",
@@ -196,10 +196,10 @@ async def run_fact_check(claim: str) -> FactCheckPipelineResult:
         )
         raw = message.content[0].text
     except anthropic.APIStatusError as exc:
-        logger.error("Anthropic API error %s: %s", exc.status_code, exc.message)
+        logger.error("Analysis service error %s: %s", exc.status_code, exc.message)
         detail = f"API error {exc.status_code}"
         if exc.status_code == 401:
-            detail = "Invalid API key (401) — check ANTHROPIC_API_KEY in backend/.env and restart the backend"
+            detail = "(401) — check backend configuration and restart the backend"
         elif exc.status_code == 403:
             detail = "Permission denied (403) — key may lack access to this model"
         elif exc.status_code == 429:

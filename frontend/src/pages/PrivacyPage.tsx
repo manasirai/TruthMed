@@ -40,7 +40,7 @@ In a production deployment, implement a documented retention and deletion schedu
         {
           icon: <Lock className="w-5 h-5" />,
           title: 'Security',
-          content: `Anthropic API keys and other secrets are stored server-side only and never transmitted to the browser. Database access is controlled via the backend only. CORS is configured to only allow the frontend origin.
+          content: `API keys and other secrets are stored server-side only and never transmitted to the browser. Database access is controlled via the backend only. CORS is configured to only allow the frontend origin.
 
 This is an open-source educational project. Deploy in a hardened environment and review the security notes in the README before exposing to the public internet.`,
         },

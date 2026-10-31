@@ -71,7 +71,6 @@ app.include_router(organs_router)
 def health():
     return {
         "status": "ok",
-        "anthropic_configured": settings.has_anthropic_key,
+        "analysis_configured": settings.has_anthropic_key,
         "retrieval_configured": settings.has_brave_key,
-        "model": settings.anthropic_model,
     }

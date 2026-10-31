@@ -47,16 +47,8 @@ If you delete `backend/truthmed.db`, it is re-created and re-seeded on the next 
 
 ### 1. Configure the API key
 
-Copy the example env file and add your Anthropic API key:
-
 ```powershell
 Copy-Item .env.example backend\.env
-```
-
-Edit `backend\.env`:
-```
-ANTHROPIC_API_KEY=sk-ant-...your-real-key-here...
-ANTHROPIC_MODEL=claude-sonnet-4-6
 ```
 
 Get an API key at: https://console.anthropic.com
@@ -214,12 +206,3 @@ TruthMed/
 ├── start.ps1                 PowerShell quick-start script
 └── .env.example              Environment variable template
 ```
-
----
-
-## Security Notes
-
-- The Anthropic API key is **never sent to the browser** — it lives only in `backend/.env` and is used server-side only.
-- CORS is restricted to the frontend origin (`http://localhost:5173`).
-- All claims are validated server-side before processing.
-- Retrieved web content is wrapped in XML delimiters and Model is instructed to treat it as raw data (prompt injection defence).
