@@ -2,10 +2,10 @@ import { Shield, BookOpen, AlertTriangle, ExternalLink, Cpu, Database } from 'lu
 import { Card } from '@/components/ui/Card';
 
 const SOURCE_HIERARCHY = [
-  { tier: 'Tier 1 — Primary', sources: 'WHO, India MoHFW/ICMR, NHS, CDC, NIH/MedlinePlus, FDA', desc: 'Official national and international public health authorities.' },
-  { tier: 'Tier 2 — Peer-Reviewed', sources: 'Systematic reviews, meta-analyses, RCTs', desc: 'Published in reputable indexed journals with peer review.' },
-  { tier: 'Tier 3 — Clinical Guidelines', sources: 'Medical specialty organizations', desc: 'Evidence-based guidelines from recognized clinical bodies.' },
-  { tier: 'Tier 4 — Observational', sources: 'Cohort and case-control studies', desc: 'Used when higher-level evidence is unavailable.' },
+  { tier: 'Tier 1  Primary', sources: 'WHO, India MoHFW/ICMR, NHS, CDC, NIH/MedlinePlus, FDA', desc: 'Official national and international public health authorities.' },
+  { tier: 'Tier 2  Peer-Reviewed', sources: 'Systematic reviews, meta-analyses, RCTs', desc: 'Published in reputable indexed journals with peer review.' },
+  { tier: 'Tier 3  Clinical Guidelines', sources: 'Medical specialty organizations', desc: 'Evidence-based guidelines from recognized clinical bodies.' },
+  { tier: 'Tier 4  Observational', sources: 'Cohort and case-control studies', desc: 'Used when higher-level evidence is unavailable.' },
 ];
 
 const LIMITATIONS = [
@@ -24,7 +24,7 @@ export function AboutPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">About TruthMed</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl">
-          TruthMed is an AI-powered health information literacy tool. It helps people evaluate the evidence behind health claims — not replace professional medical judgment.
+          TruthMed is an AI-powered health information literacy tool. It helps people evaluate the evidence behind health claims  not replace professional medical judgment.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export function AboutPage() {
             <li>If a search provider is configured (Brave Search API), we query trusted medical domains for relevant evidence.</li>
             <li>Retrieved content is passed to backend model with strict instructions to treat external data as raw input, not trusted instructions.</li>
             <li>Backend synthesizes the evidence, identifies contradictions, and produces a structured assessment.</li>
-            <li>The response is validated against a Pydantic schema. If parsing fails, the error is caught and reported — not silently ignored.</li>
+            <li>The response is validated against a Pydantic schema. If parsing fails, the error is caught and reported  not silently ignored.</li>
             <li>Results, sources, and metadata are persisted in the database.</li>
           </ol>
           <p className="bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 rounded-lg p-3 text-amber-800 dark:text-amber-300 text-xs">

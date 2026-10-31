@@ -1,4 +1,4 @@
-# TruthMed — AI Health Fact Checker & 3D Anatomy Explorer
+# TruthMed  AI Health Fact Checker & 3D Anatomy Explorer
 
 AI-powered health claim verification and interactive 3D anatomy education.
 
@@ -6,7 +6,7 @@ AI-powered health claim verification and interactive 3D anatomy education.
 
 ## Quick Start
 
-**Double-click `start.bat`** (Windows) — opens two terminal windows, one for the backend and one for the frontend.
+**Double-click `start.bat`** (Windows)  opens two terminal windows, one for the backend and one for the frontend.
 
 Or with PowerShell:
 ```powershell
@@ -70,7 +70,7 @@ npm install
 
 ## Running the App
 
-### Option A — Batch script (easiest)
+### Option A  Batch script (easiest)
 
 ```
 start.bat
@@ -78,21 +78,21 @@ start.bat
 
 Opens two windows: one for backend, one for frontend.
 
-### Option B — PowerShell script
+### Option B  PowerShell script
 
 ```powershell
 .\start.ps1
 ```
 
-### Option C — Manual (two terminals)
+### Option C  Manual (two terminals)
 
-**Terminal 1 — Backend:**
+**Terminal 1  Backend:**
 ```powershell
 cd backend
 uvicorn main:app --reload --port 8001
 ```
 
-**Terminal 2 — Frontend:**
+**Terminal 2  Frontend:**
 ```powershell
 cd frontend
 npm run dev

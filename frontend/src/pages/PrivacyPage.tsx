@@ -14,7 +14,7 @@ export function PrivacyPage() {
           icon: <Database className="w-5 h-5" />,
           title: 'What We Store',
           content: `When you submit a health claim, TruthMed stores:
-• The claim text (anonymously — no account or identity is linked)
+• The claim text (anonymously  no account or identity is linked)
 • The analysis result and verdict
 • Source citations generated during analysis
 • The timestamp of the analysis

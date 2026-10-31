@@ -1,5 +1,5 @@
 """
-TruthMed Backend — FastAPI application entry point.
+TruthMed Backend  FastAPI application entry point.
 
 Start with:
     cd backend

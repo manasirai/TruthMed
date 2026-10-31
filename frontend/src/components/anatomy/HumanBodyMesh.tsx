@@ -71,7 +71,7 @@ function makeGeo(p: PartDef): THREE.BufferGeometry {
 export function HumanBodyMesh() {
   const geos = useMemo(() => BODY_PARTS.map(makeGeo), []);
 
-  // Semi-transparent skin — organs show through
+  // Semi-transparent skin  organs show through
   const mat = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({

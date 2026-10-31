@@ -39,7 +39,7 @@ export function ExplorePage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row overflow-hidden">
-      {/* Left sidebar — organ list */}
+      {/* Left sidebar  organ list */}
       <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 overflow-y-auto">
         <div className="p-3 sticky top-0 bg-white dark:bg-gray-950 z-10 border-b border-gray-100 dark:border-gray-800">
           <h1 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">Anatomy Explorer</h1>
@@ -171,7 +171,7 @@ export function ExplorePage() {
 
         {/* Model disclaimer */}
         <div className="absolute top-3 right-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded text-xs text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-800">
-          Procedural model — educational use only
+          Procedural model  educational use only
         </div>
       </div>
 

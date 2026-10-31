@@ -29,7 +29,7 @@ const FEATURES = [
   {
     icon: <Shield className="w-5 h-5" />,
     title: 'Transparent Verdicts',
-    desc: 'Six verdict categories with clear explanations — we never force a claim into just "true" or "false".',
+    desc: 'Six verdict categories with clear explanations  we never force a claim into just "true" or "false".',
   },
   {
     icon: <Brain className="w-5 h-5" />,
@@ -40,7 +40,7 @@ const FEATURES = [
   {
     icon: <BookOpen className="w-5 h-5" />,
     title: 'Cited Sources',
-    desc: 'Every analysis cites its sources — no hallucinated URLs, no fabricated statistics.',
+    desc: 'Every analysis cites its sources  no hallucinated URLs, no fabricated statistics.',
   },
 ];
 
@@ -89,7 +89,7 @@ export function HomePage() {
 
             <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-8 max-w-xl">
               TruthMed analyzes health claims against peer-reviewed medical evidence and
-              trusted authorities — and tells you exactly what the science actually says.
+              trusted authorities  and tells you exactly what the science actually says.
             </p>
 
             <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 shadow-card-md">

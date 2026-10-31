@@ -82,15 +82,15 @@ function Scene({
       <PerspectiveCamera makeDefault position={[0, 0.9, 2.5]} fov={42} />
       <CameraController selectedOrganId={selectedOrganId} />
 
-      {/* Key light — front-right, simulates overhead operating-theatre light */}
+      {/* Key light  front-right, simulates overhead operating-theatre light */}
       <directionalLight position={[1.5, 3.5, 2.5]} intensity={1.1} color="#fff8f2" />
-      {/* Fill light — front-left, cool to suggest reflected ambient */}
+      {/* Fill light  front-left, cool to suggest reflected ambient */}
       <directionalLight position={[-2.5, 1.5, 1.5]} intensity={0.45} color="#c8d8ff" />
-      {/* Rim light — behind, gives separation from background */}
+      {/* Rim light  behind, gives separation from background */}
       <directionalLight position={[0, 0.5, -3]}    intensity={0.3}  color="#a0b8d8" />
-      {/* Under-fill — lifts shadows on inferior organ surfaces */}
+      {/* Under-fill  lifts shadows on inferior organ surfaces */}
       <pointLight position={[0, -1.0, 1]} intensity={0.25} color="#ffe8d0" />
-      {/* Ambient — prevents completely black shadows */}
+      {/* Ambient  prevents completely black shadows */}
       <ambientLight intensity={0.38} color="#e8eeff" />
 
       {/* Subtle floor disc for spatial grounding */}

@@ -19,7 +19,7 @@ const TOPICS = [
   {
     title: 'The Evidence Hierarchy',
     icon: <Brain className="w-5 h-5" />,
-    desc: 'From expert opinion to systematic reviews — discover how TruthMed prioritizes different types of evidence and why some sources are more reliable.',
+    desc: 'From expert opinion to systematic reviews  discover how TruthMed prioritizes different types of evidence and why some sources are more reliable.',
     tags: ['Evidence grading', 'Methodology'],
   },
   {
@@ -85,7 +85,7 @@ export function LearnPage() {
             </Card>
           ))}
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">Full articles coming soon — content under medical review.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">Full articles coming soon  content under medical review.</p>
       </section>
 
       {/* Anatomy highlights */}

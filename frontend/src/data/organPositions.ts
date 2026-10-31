@@ -3,7 +3,7 @@
  *
  * Positions are in Three.js scene units, mapped to a human body ~2 units tall
  * (1 unit ≈ 0.9 m).  Scales are tuned for the multi-part geometries produced
- * by organGeometries.ts — each geometry has a bounding box of roughly ±0.5 units
+ * by organGeometries.ts  each geometry has a bounding box of roughly ±0.5 units
  * before scaling, except multi-part organs (brain, lungs, kidneys, intestines)
  * whose bounding boxes are larger.
  *
