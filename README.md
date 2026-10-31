@@ -124,7 +124,7 @@ npm run dev
 
 ## Running Tests
 
-**Backend tests** (18 tests, uses mocked Claude — no API key needed):
+**Backend tests**
 ```powershell
 cd backend
 python -m pytest tests/ -v
@@ -170,8 +170,6 @@ npm test
 
 ## Optional: Evidence Retrieval
 
-By default, analysis uses Claude's training knowledge only.
-
 To enable real-time medical source retrieval (Brave Search API):
 
 1. Get a key at https://api.search.brave.com
@@ -196,7 +194,7 @@ TruthMed/
 │   │   ├── db/               SQLAlchemy setup + organ seed data
 │   │   ├── models/           SQLAlchemy ORM models
 │   │   ├── schemas/          Pydantic request/response schemas
-│   │   └── services/         Claude AI pipeline + evidence retrieval
+│   │   └── services/         Model and AI pipeline + evidence retrieval
 │   ├── tests/                Pytest test suite (18 tests)
 │   └── main.py               FastAPI app entry point
 │
@@ -224,14 +222,4 @@ TruthMed/
 - The Anthropic API key is **never sent to the browser** — it lives only in `backend/.env` and is used server-side only.
 - CORS is restricted to the frontend origin (`http://localhost:5173`).
 - All claims are validated server-side before processing.
-- Retrieved web content is wrapped in XML delimiters and Claude is instructed to treat it as raw data (prompt injection defence).
-- For public deployment: use HTTPS, set a strong `APP_SECRET_KEY`, restrict CORS to your domain, and deploy behind a reverse proxy.
-
----
-
-## Known Limitations
-
-- The 3D anatomy model uses simplified procedural geometry (spheres/capsules). It is clearly labelled as educational.  
-  Replace `frontend/src/components/anatomy/HumanBodyMesh.tsx` with a licensed segmented glTF model for production use.
-- Analysis without `BRAVE_SEARCH_API_KEY` uses Claude's training knowledge only — facts are current as of Claude's training cutoff.
-- TruthMed is **not a medical device** and does not provide personal medical advice. Always consult a qualified healthcare professional.
+- Retrieved web content is wrapped in XML delimiters and Model is instructed to treat it as raw data (prompt injection defence).

@@ -9,7 +9,7 @@ const SOURCE_HIERARCHY = [
 ];
 
 const LIMITATIONS = [
-  'Knowledge cutoff: Claude\'s training has a knowledge cutoff. Very recent developments may not be reflected.',
+  'Knowledge cutoff: Models training has a knowledge cutoff. Very recent developments may not be reflected.',
   'No live search by default: Without a configured search provider, analysis relies on training knowledge.',
   'Not a medical device: TruthMed is not approved or regulated as a medical device or diagnostic tool.',
   'Nuance loss: Complex medical topics may be oversimplified. Always read the full cited sources.',
@@ -41,8 +41,8 @@ export function AboutPage() {
           <ol className="list-decimal list-inside space-y-2 ml-2">
             <li>The claim is validated, normalized, and classified by type (medical, nutritional, supplement, etc.).</li>
             <li>If a search provider is configured (Brave Search API), we query trusted medical domains for relevant evidence.</li>
-            <li>Retrieved content is passed to Claude with strict instructions to treat external data as raw input, not trusted instructions.</li>
-            <li>Claude synthesizes the evidence, identifies contradictions, and produces a structured assessment.</li>
+            <li>Retrieved content is passed to backend model with strict instructions to treat external data as raw input, not trusted instructions.</li>
+            <li>Backend synthesizes the evidence, identifies contradictions, and produces a structured assessment.</li>
             <li>The response is validated against a Pydantic schema. If parsing fails, the error is caught and reported — not silently ignored.</li>
             <li>Results, sources, and metadata are persisted in the database.</li>
           </ol>

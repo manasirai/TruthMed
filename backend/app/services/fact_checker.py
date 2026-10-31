@@ -1,20 +1,3 @@
-"""
-Claude-powered health claim fact-checking pipeline.
-
-Steps:
-1. Validate and normalize the claim.
-2. Attempt evidence retrieval via configured provider.
-3. Build a structured prompt for Claude.
-4. Parse and validate Claude's structured JSON response.
-5. Return a FactCheckPipelineResult.
-
-The API key is never transmitted to the frontend.
-Prompt injection from retrieved web snippets is defended by:
-- Only including content from the trusted-domain allowlist.
-- Wrapping retrieved snippets in XML delimiters so Claude treats them as data.
-- Instructing Claude explicitly to disregard any instructions embedded in sources.
-"""
-
 from __future__ import annotations
 
 import json
@@ -260,7 +243,7 @@ async def run_fact_check(claim: str) -> FactCheckPipelineResult:
         data = _parse_response(raw)
         return _validate_and_normalize(data, claim, retrieval)
     except (json.JSONDecodeError, KeyError, ValueError) as exc:
-        logger.error("Failed to parse Claude response: %s\nRaw: %s", exc, raw[:500])
+        logger.error("Failed to parse response: %s\nRaw: %s", exc, raw[:500])
         return FactCheckPipelineResult(
             verdict="insufficient_evidence",
             verdict_label="Parse Error",
