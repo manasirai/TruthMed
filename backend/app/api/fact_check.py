@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import unicodedata
 from datetime import datetime, timezone
 
@@ -36,29 +37,33 @@ def _normalize_claim(claim: str) -> str:
     return " ".join(no_punct.split())
 
 
+def _strip_dashes(text: str) -> str:
+    return re.sub(r"\s*—\s*", " ", text).strip()
+
+
 def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
     return FactCheckResultOut(
         id=result.id,
         request_id=result.request_id,
         verdict=result.verdict,
-        verdict_label=result.verdict_label,
+        verdict_label=_strip_dashes(result.verdict_label),
         claim_text=claim_text,
         claim_type=result.claim_type,
-        short_answer=result.short_answer,
-        what_evidence_says=result.what_evidence_says,
-        why_accurate_or_not=result.why_accurate_or_not,
-        supporting_evidence=result.supporting_evidence,
-        contradicting_evidence=result.contradicting_evidence,
-        missing_context=result.missing_context,
-        what_to_do_next=result.what_to_do_next,
-        when_to_seek_care=result.when_to_seek_care,
+        short_answer=_strip_dashes(result.short_answer),
+        what_evidence_says=_strip_dashes(result.what_evidence_says),
+        why_accurate_or_not=_strip_dashes(result.why_accurate_or_not),
+        supporting_evidence=_strip_dashes(result.supporting_evidence),
+        contradicting_evidence=_strip_dashes(result.contradicting_evidence),
+        missing_context=_strip_dashes(result.missing_context),
+        what_to_do_next=_strip_dashes(result.what_to_do_next),
+        when_to_seek_care=_strip_dashes(result.when_to_seek_care),
         sources=[
             {
-                "title": s.title,
-                "publisher": s.publisher,
+                "title": _strip_dashes(s.title),
+                "publisher": _strip_dashes(s.publisher),
                 "url": s.url,
                 "publication_date": s.publication_date,
-                "relevance_note": s.relevance_note,
+                "relevance_note": _strip_dashes(s.relevance_note),
                 "source_tier": s.source_tier,
             }
             for s in sorted(result.sources, key=lambda x: x.position)
@@ -162,7 +167,7 @@ def get_history(
                 request_id=r.request_id,
                 claim_text=req.claim_text if req else "Unknown",
                 verdict=r.verdict,
-                verdict_label=r.verdict_label,
+                verdict_label=_strip_dashes(r.verdict_label),
                 claim_type=r.claim_type,
                 analyzed_at=r.created_at,
             )
