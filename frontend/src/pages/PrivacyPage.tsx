@@ -31,15 +31,6 @@ We do not store your IP address in the fact-check database. We do not require re
 • Passwords or authentication credentials`,
         },
         {
-          icon: <Globe className="w-5 h-5" />,
-          title: 'Third-Party Services',
-          content: `Analysis is powered by the Anthropic Claude API. Claim text is sent to Anthropic's servers for processing. Review Anthropic's privacy policy for their data practices.
-
-If configured, evidence retrieval uses the Brave Search API. Brave's privacy policy applies to search queries.
-
-No analytics, advertising, or tracking services are embedded in this application.`,
-        },
-        {
           icon: <Trash2 className="w-5 h-5" />,
           title: 'Data Retention',
           content: `Analysis history is retained for operational purposes and to support the history feature. We do not currently provide a self-service deletion tool. If you wish to request deletion of specific analysis records, contact the system administrator.
@@ -49,7 +40,7 @@ In a production deployment, implement a documented retention and deletion schedu
         {
           icon: <Lock className="w-5 h-5" />,
           title: 'Security',
-          content: `Anthropic API keys and other secrets are stored server-side only and never transmitted to the browser. Database access is controlled via the backend only. CORS is configured to only allow the frontend origin.
+          content: `API keys and other secrets are stored server-side only and never transmitted to the browser. Database access is controlled via the backend only. CORS is configured to only allow the frontend origin.
 
 This is an open-source educational project. Deploy in a hardened environment and review the security notes in the README before exposing to the public internet.`,
         },

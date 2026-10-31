@@ -67,9 +67,6 @@ export function Footer() {
           <p className="text-xs text-gray-400 dark:text-gray-500">
             © {new Date().getFullYear()} TruthMed. For educational purposes only.
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Powered by Claude AI · Content reviewed against WHO, NHS, NIH sources
-          </p>
         </div>
       </div>
     </footer>

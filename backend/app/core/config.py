@@ -11,23 +11,18 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Anthropic
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-6"
 
-    # Database
     database_url: str = "sqlite:///./truthmed.db"
 
-    # App
     app_env: str = "development"
     app_secret_key: str = "dev-secret-change-in-production"
     cors_origins: str = "http://localhost:5173,http://localhost:4173"
 
-    # Rate limiting
     rate_limit_per_minute: int = 10
     request_max_chars: int = 2000
 
-    # Optional search provider
     brave_search_api_key: str = ""
 
     @property

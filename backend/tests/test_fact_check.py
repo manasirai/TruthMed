@@ -1,5 +1,3 @@
-"""Tests for fact-check endpoints — uses mocked Anthropic API."""
-
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch

@@ -72,7 +72,6 @@ def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
 async def create_fact_check(body: FactCheckRequestSchema, db: Session = Depends(get_db)) -> FactCheckResultOut:
     normalized = _normalize_claim(body.claim)
 
-    # Reuse the latest successful analysis of the same claim instead of calling Claude again
     cached = (
         db.query(FactCheckRequest)
         .filter_by(claim_normalized=normalized, status="completed")
