@@ -166,3 +166,36 @@ def test_failed_analysis_is_not_reused(client, mock_fact_check):
     second = client.post("/api/v1/fact-check", json=claim)
     assert second.json()["id"] != first.json()["id"]
     assert mock_fact_check.call_count == 2
+
+
+def test_delete_selected_history_items(client, mock_fact_check):
+    keep = client.post("/api/v1/fact-check", json={"claim": "Garlic lowers blood pressure in adults."}).json()["id"]
+    drop = client.post("/api/v1/fact-check", json={"claim": "Sugar makes children hyperactive."}).json()["id"]
+    client.post("/api/v1/feedback", json={"result_id": drop, "rating": 5})
+
+    resp = client.post("/api/v1/fact-check/history/delete", json={"ids": [drop, "missing-id"]})
+    assert resp.status_code == 200
+    assert resp.json()["deleted"] == 1
+    assert client.get(f"/api/v1/fact-check/{drop}").status_code == 404
+    assert client.get(f"/api/v1/fact-check/{keep}").status_code == 200
+
+
+def test_delete_selected_requires_ids(client):
+    resp = client.post("/api/v1/fact-check/history/delete", json={"ids": []})
+    assert resp.status_code == 422
+
+
+def test_deleted_claim_is_reanalyzed(client, mock_fact_check):
+    claim = {"claim": "Cracking knuckles causes arthritis."}
+    first = client.post("/api/v1/fact-check", json=claim).json()["id"]
+    client.post("/api/v1/fact-check/history/delete", json={"ids": [first]})
+    second = client.post("/api/v1/fact-check", json=claim).json()["id"]
+    assert second != first
+
+
+def test_clear_all_history(client, mock_fact_check):
+    client.post("/api/v1/fact-check", json={"claim": "Reading in dim light damages your eyes."})
+    resp = client.delete("/api/v1/fact-check/history")
+    assert resp.status_code == 200
+    assert resp.json()["deleted"] >= 1
+    assert client.get("/api/v1/fact-check/history").json()["total"] == 0

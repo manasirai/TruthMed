@@ -28,6 +28,14 @@ export const api = {
       request<{ items: FactCheckResult[]; total: number; page: number; page_size: number }>(
         `/fact-check/history?page=${page}&page_size=${pageSize}`
       ),
+
+    deleteHistoryItems: (ids: string[]) =>
+      request<{ deleted: number }>('/fact-check/history/delete', {
+        method: 'POST',
+        body: JSON.stringify({ ids }),
+      }),
+
+    clearHistory: () => request<{ deleted: number }>('/fact-check/history', { method: 'DELETE' }),
   },
 
   organs: {

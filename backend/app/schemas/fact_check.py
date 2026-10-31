@@ -90,6 +90,14 @@ class FactCheckHistoryResponse(BaseModel):
     page_size: int
 
 
+class HistoryDeleteRequest(BaseModel):
+    ids: list[str] = Field(..., min_length=1, max_length=500)
+
+
+class HistoryDeleteResponse(BaseModel):
+    deleted: int
+
+
 class FeedbackRequest(BaseModel):
     result_id: str
     rating: int = Field(..., ge=1, le=5)

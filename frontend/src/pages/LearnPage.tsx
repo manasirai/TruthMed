@@ -42,6 +42,9 @@ const TOPICS = [
   },
 ];
 
+// Anatomy explorer links are temporarily hidden; set to true to bring them back.
+const SHOW_ANATOMY = false;
+
 const ANATOMY_HIGHLIGHTS = [
   { id: 'heart', name: 'Heart', fact: 'Beats ~100,000 times per day. Cardiovascular disease is the world\'s leading cause of death.' },
   { id: 'brain', name: 'Brain', fact: 'Uses 20% of your body\'s oxygen despite being only 2% of your body weight.' },
@@ -89,22 +92,29 @@ export function LearnPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Did You Know?</h2>
-          <Link to="/explore" className="text-xs text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1">
-            Full anatomy explorer <ArrowRight className="w-3 h-3" />
-          </Link>
+          {SHOW_ANATOMY && (
+            <Link to="/explore" className="text-xs text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1">
+              Full anatomy explorer <ArrowRight className="w-3 h-3" />
+            </Link>
+          )}
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ANATOMY_HIGHLIGHTS.map((item) => (
-            <Link key={item.id} to={`/explore/${item.id}`}>
-              <Card className="hover:shadow-card-md transition-shadow hover:border-teal-100 dark:hover:border-teal-900 cursor-pointer h-full">
+          {ANATOMY_HIGHLIGHTS.map((item) => {
+            const card = (
+              <Card className={`h-full ${SHOW_ANATOMY ? 'hover:shadow-card-md transition-shadow hover:border-teal-100 dark:hover:border-teal-900 cursor-pointer' : ''}`}>
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="w-4 h-4 text-teal-500" />
                   <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">{item.name}</span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.fact}</p>
               </Card>
-            </Link>
-          ))}
+            );
+            return SHOW_ANATOMY ? (
+              <Link key={item.id} to={`/explore/${item.id}`}>{card}</Link>
+            ) : (
+              <div key={item.id}>{card}</div>
+            );
+          })}
         </div>
       </section>
 

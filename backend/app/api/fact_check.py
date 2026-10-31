@@ -21,6 +21,8 @@ from app.schemas.fact_check import (
     FactCheckResultOut,
     FeedbackRequest,
     FeedbackResponse,
+    HistoryDeleteRequest,
+    HistoryDeleteResponse,
 )
 from app.services.fact_checker import run_fact_check
 
@@ -168,6 +170,34 @@ def get_history(
         )
 
     return FactCheckHistoryResponse(items=items, total=total, page=page, page_size=page_size)
+
+
+def _delete_results(db: Session, results: list[FactCheckResult]) -> int:
+    """Delete results with their feedback, sources and originating request (so the claim is re-analyzed next time)."""
+    if not results:
+        return 0
+    result_ids = [r.id for r in results]
+    db.query(UserFeedback).filter(UserFeedback.result_id.in_(result_ids)).delete(synchronize_session=False)
+    for r in results:
+        # Deleting the request cascades to its result and evidence sources
+        db.delete(r.request if r.request else r)
+    db.commit()
+    return len(results)
+
+
+@router.delete("/fact-check/history", response_model=HistoryDeleteResponse)
+def clear_history(db: Session = Depends(get_db)) -> HistoryDeleteResponse:
+    deleted = _delete_results(db, db.query(FactCheckResult).all())
+    # Drop requests that never produced a result as well
+    db.query(FactCheckRequest).delete(synchronize_session=False)
+    db.commit()
+    return HistoryDeleteResponse(deleted=deleted)
+
+
+@router.post("/fact-check/history/delete", response_model=HistoryDeleteResponse)
+def delete_history_items(body: HistoryDeleteRequest, db: Session = Depends(get_db)) -> HistoryDeleteResponse:
+    results = db.query(FactCheckResult).filter(FactCheckResult.id.in_(body.ids)).all()
+    return HistoryDeleteResponse(deleted=_delete_results(db, results))
 
 
 @router.get("/fact-check/{result_id}", response_model=FactCheckResultOut)

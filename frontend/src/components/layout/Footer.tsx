@@ -24,7 +24,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-              AI-powered health claim verification and interactive anatomy education.
+              AI-powered health claim verification and health education.
             </p>
           </div>
 
@@ -33,10 +33,10 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { to: '/fact-check', label: 'Fact Checker' },
-                { to: '/explore', label: '3D Anatomy Explorer' },
+                { to: '/explore', label: '3D Anatomy Explorer', hidden: true },
                 { to: '/learn', label: 'Health Education' },
                 { to: '/history', label: 'Analysis History' },
-              ].map((l) => (
+              ].filter((l) => !l.hidden).map((l) => (
                 <li key={l.to}>
                   <Link to={l.to} className="text-xs text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                     {l.label}
