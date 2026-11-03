@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { ClaimInput } from '@/components/fact-check/ClaimInput';
 import { useMutation } from '@tanstack/react-query';
+import { pet } from '@/components/mypet';
 import { api } from '@/lib/api';
 import { useNavigate as useNav } from 'react-router-dom';
 
@@ -59,9 +60,11 @@ export function HomePage() {
   const { mutate: checkClaim, isPending } = useMutation({
     mutationFn: (claim: string) => api.factCheck.create(claim),
     onSuccess: (result) => {
+      pet.stopWork('celebrate', 'Done! Here’s what I found.');
       navigate('/fact-check', { state: { result } });
     },
     onError: () => {
+      pet.stopWork('sad', 'Hmm, I couldn’t finish that one.');
       navigate('/fact-check', { state: { error: true } });
     },
   });

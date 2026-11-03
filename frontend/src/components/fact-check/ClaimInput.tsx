@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlaskConical, Lightbulb, Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { cn } from '@/lib/utils';
+import { pet } from '@/components/mypet';
 
 // en-IN also transcribes Hinglish (romanized Hindi); hi-IN produces Devanagari.
 const VOICE_LANGUAGES = [
@@ -31,6 +32,13 @@ export function ClaimInput({ onSubmit, loading, initialValue = '' }: ClaimInputP
   const [claim, setClaim] = useState(initialValue);
   const [error, setError] = useState('');
   const [voiceLang, setVoiceLang] = useState(VOICE_LANGUAGES[0].code);
+
+  // While a claim is being analyzed the pet sits at its desk and works on the computer.
+  useEffect(() => {
+    if (!loading) return;
+    pet.work();
+    return () => pet.stopWork();
+  }, [loading]);
 
   const speech = useSpeechRecognition((text) => {
     setClaim((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text).slice(0, 2000));

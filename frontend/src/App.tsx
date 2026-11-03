@@ -7,24 +7,28 @@ import { LearnPage } from './pages/LearnPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AboutPage } from './pages/AboutPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { WebPet, PetErrorBoundary } from './components/mypet';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/fact-check" element={<FactCheckPage />} />
-          <Route path="/fact-check/:resultId" element={<FactCheckPage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/explore/:organId" element={<ExplorePage />} />
-          <Route path="/learn" element={<LearnPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <PetErrorBoundary fallback={<p>Something went wrong. Please refresh the page.</p>}>
+      <BrowserRouter>
+        <WebPet name="Mochi" sleepAfter={30000} />
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/fact-check" element={<FactCheckPage />} />
+            <Route path="/fact-check/:resultId" element={<FactCheckPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/explore/:organId" element={<ExplorePage />} />
+            <Route path="/learn" element={<LearnPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </PetErrorBoundary>
   );
 }

@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { PageSpinner, Spinner } from '@/components/ui/Spinner';
 import type { FactCheckResult } from '@/types';
+import { pet } from '@/components/mypet';
 
 type PageState = 'idle' | 'loading' | 'result' | 'error';
 
@@ -64,10 +65,12 @@ function NewFactCheck() {
     onSuccess: (data) => {
       setResult(data);
       setState('result');
+      pet.stopWork('celebrate', 'Done! Here’s what I found.');
     },
     onError: (err: Error) => {
       setApiError(err.message || 'Analysis failed. Please try again.');
       setState('error');
+      pet.stopWork('sad', 'Hmm, I couldn’t finish that one.');
     },
   });
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BookOpen, AlertTriangle, CheckCircle, XCircle,
   HelpCircle, ArrowRight, Clock, ExternalLink, ChevronDown, ChevronUp, Star, Volume2, Square
@@ -11,6 +11,7 @@ import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import type { FactCheckResult as Result } from '@/types';
+import { pet } from '@/components/mypet';
 
 interface Props {
   result: Result;
@@ -97,6 +98,13 @@ export function FactCheckResultView({ result, onReset }: Props) {
   const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const tts = useSpeechSynthesis();
+
+  // While the result is read aloud the pet puts on shades, grabs a mic and reads along.
+  useEffect(() => {
+    if (!tts.speaking) return;
+    pet.readAloud();
+    return () => pet.stopReading('happy');
+  }, [tts.speaking]);
 
   function toggleListen() {
     if (tts.speaking) return tts.stop();
