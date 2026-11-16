@@ -20,6 +20,8 @@ class FactCheckRequest(Base):
     claim_text: Mapped[str] = mapped_column(Text, nullable=False)
     # Lowercased, punctuation-stripped claim used to reuse earlier results for repeated claims
     claim_normalized: Mapped[str | None] = mapped_column(Text, nullable=True, index=True)
+    # Anonymous per-browser ID (X-Client-Id header) so each visitor only sees and deletes their own history
+    client_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     language: Mapped[str] = mapped_column(String(10), default="en")
     context_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

@@ -3,10 +3,9 @@ import { AppLayout } from './components/layout/AppLayout';
 import { HomePage } from './pages/HomePage';
 import { FactCheckPage } from './pages/FactCheckPage';
 import { ExplorePage } from './pages/ExplorePage';
-import { LearnPage } from './pages/LearnPage';
+import { MythsPage } from './pages/MythsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AboutPage } from './pages/AboutPage';
-import { PrivacyPage } from './pages/PrivacyPage';
 import { WebPet, PetErrorBoundary } from './components/mypet';
 
 export default function App() {
@@ -21,10 +20,10 @@ export default function App() {
             <Route path="/fact-check/:resultId" element={<FactCheckPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/explore/:organId" element={<ExplorePage />} />
-            <Route path="/learn" element={<LearnPage />} />
+            <Route path="/myths" element={<MythsPage />} />
+            <Route path="/learn" element={<Navigate to="/myths" replace />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

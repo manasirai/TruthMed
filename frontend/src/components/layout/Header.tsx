@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { to: '/', label: 'Home', exact: true },
   { to: '/fact-check', label: 'Fact Check' },
   { to: '/explore', label: 'Anatomy', hidden: true },
-  { to: '/learn', label: 'Learn' },
+  { to: '/myths', label: 'Myths' },
   { to: '/history', label: 'History' },
   { to: '/about', label: 'About' },
 ];

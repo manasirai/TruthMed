@@ -1,11 +1,32 @@
 import type { FactCheckResult, OrganDetail, OrganSummary } from '@/types';
 
 const API_BASE = '/api/v1';
+const CLIENT_ID_KEY = 'truthmed-client-id';
+
+// Anonymous random ID for this browser. The backend uses it so each visitor only sees and deletes their own history.
+let clientId: string | null = null;
+function getClientId(): string {
+  if (clientId) return clientId;
+  try {
+    clientId = localStorage.getItem(CLIENT_ID_KEY);
+  } catch {
+    // Storage blocked (private mode etc.): fall back to an ID for this session only
+  }
+  if (!clientId) {
+    clientId = crypto.randomUUID();
+    try {
+      localStorage.setItem(CLIENT_ID_KEY, clientId);
+    } catch {
+      /* ignore */
+    }
+  }
+  return clientId;
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: { 'Content-Type': 'application/json', 'X-Client-Id': getClientId() },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
@@ -33,6 +54,12 @@ export const api = {
       request<{ deleted: number }>('/fact-check/history/delete', {
         method: 'POST',
         body: JSON.stringify({ ids }),
+      }),
+
+    lookup: (claims: string[]) =>
+      request<{ claim: string; result_id: string; verdict: string; verdict_label: string }[]>('/fact-check/lookup', {
+        method: 'POST',
+        body: JSON.stringify({ claims }),
       }),
 
     clearHistory: () => request<{ deleted: number }>('/fact-check/history', { method: 'DELETE' }),

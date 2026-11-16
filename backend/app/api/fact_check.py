@@ -1,13 +1,14 @@
-from __future__ import annotations
-
 import logging
 import re
 import unicodedata
+import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.db.database import get_db
 from app.models.fact_check import (
     EvidenceSource,
@@ -24,6 +25,8 @@ from app.schemas.fact_check import (
     FeedbackResponse,
     HistoryDeleteRequest,
     HistoryDeleteResponse,
+    VerdictLookupItem,
+    VerdictLookupRequest,
 )
 from app.services.fact_checker import run_fact_check
 
@@ -37,8 +40,17 @@ def _normalize_claim(claim: str) -> str:
     return " ".join(no_punct.split())
 
 
+def get_client_id(x_client_id: str = Header(default="")) -> str:
+    """Anonymous per-browser ID sent by the frontend; scopes history so visitors can't see or delete each other's."""
+    try:
+        return str(uuid.UUID(x_client_id))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Missing or invalid X-Client-Id header")
+
+
 def _strip_dashes(text: str) -> str:
-    return re.sub(r"\s*—\s*", " ", text).strip()
+    # Replace em dashes with a comma rather than a bare space, so the sentence keeps its punctuation
+    return re.sub(r"\s*—\s*", ", ", text).strip()
 
 
 def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
@@ -73,8 +85,56 @@ def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
     )
 
 
+def _copy_result_for_client(cached: FactCheckRequest, body: FactCheckRequestSchema, client_id: str) -> FactCheckRequest:
+    """Clone a completed analysis into a new request owned by this client, so it shows in their history."""
+    src = cached.result
+    now = datetime.now(timezone.utc)
+    req = FactCheckRequest(
+        claim_text=body.claim,
+        claim_normalized=cached.claim_normalized,
+        client_id=client_id,
+        language=body.language,
+        context_url=body.context_url,
+        status="completed",
+        completed_at=now,
+    )
+    req.result = FactCheckResult(
+        verdict=src.verdict,
+        verdict_label=src.verdict_label,
+        claim_type=src.claim_type,
+        short_answer=src.short_answer,
+        what_evidence_says=src.what_evidence_says,
+        why_accurate_or_not=src.why_accurate_or_not,
+        supporting_evidence=src.supporting_evidence,
+        contradicting_evidence=src.contradicting_evidence,
+        missing_context=src.missing_context,
+        what_to_do_next=src.what_to_do_next,
+        when_to_seek_care=src.when_to_seek_care,
+        retrieval_status=src.retrieval_status,
+        sources=[
+            EvidenceSource(
+                title=s.title,
+                publisher=s.publisher,
+                url=s.url,
+                publication_date=s.publication_date,
+                relevance_note=s.relevance_note,
+                source_tier=s.source_tier,
+                position=s.position,
+            )
+            for s in src.sources
+        ],
+    )
+    return req
+
+
 @router.post("/fact-check", response_model=FactCheckResultOut)
-async def create_fact_check(body: FactCheckRequestSchema, db: Session = Depends(get_db)) -> FactCheckResultOut:
+@limiter.limit(f"{settings.rate_limit_per_minute}/minute")
+async def create_fact_check(
+    request: Request,
+    body: FactCheckRequestSchema,
+    client_id: str = Depends(get_client_id),
+    db: Session = Depends(get_db),
+) -> FactCheckResultOut:
     normalized = _normalize_claim(body.claim)
 
     cached = (
@@ -85,12 +145,19 @@ async def create_fact_check(body: FactCheckRequestSchema, db: Session = Depends(
     )
     if cached and cached.result:
         logger.info("Reusing fact-check result %s for repeated claim", cached.result.id)
-        return _to_out(cached.result, cached.claim_text)
+        if cached.client_id == client_id:
+            return _to_out(cached.result, cached.claim_text)
+        copy = _copy_result_for_client(cached, body, client_id)
+        db.add(copy)
+        db.commit()
+        db.refresh(copy)
+        return _to_out(copy.result, copy.claim_text)
 
     # Persist request
     req = FactCheckRequest(
         claim_text=body.claim,
         claim_normalized=normalized,
+        client_id=client_id,
         language=body.language,
         context_url=body.context_url,
         status="pending",
@@ -146,12 +213,19 @@ async def create_fact_check(body: FactCheckRequestSchema, db: Session = Depends(
 def get_history(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    client_id: str = Depends(get_client_id),
     db: Session = Depends(get_db),
 ) -> FactCheckHistoryResponse:
     offset = (page - 1) * page_size
-    total = db.query(FactCheckResult).count()
-    results = (
+    # Only this client's successful analyses; failed ones (missing key, API/parse errors) are not real verdicts
+    query = (
         db.query(FactCheckResult)
+        .join(FactCheckResult.request)
+        .filter(FactCheckRequest.client_id == client_id, FactCheckRequest.status == "completed")
+    )
+    total = query.count()
+    results = (
+        query.options(joinedload(FactCheckResult.request))
         .order_by(FactCheckResult.created_at.desc())
         .offset(offset)
         .limit(page_size)
@@ -160,7 +234,7 @@ def get_history(
 
     items = []
     for r in results:
-        req = db.query(FactCheckRequest).filter_by(id=r.request_id).first()
+        req = r.request
         items.append(
             FactCheckListItem(
                 id=r.id,
@@ -189,19 +263,58 @@ def _delete_results(db: Session, results: list[FactCheckResult]) -> int:
     return len(results)
 
 
+def _client_results(db: Session, client_id: str):
+    return db.query(FactCheckResult).join(FactCheckResult.request).filter(FactCheckRequest.client_id == client_id)
+
+
 @router.delete("/fact-check/history", response_model=HistoryDeleteResponse)
-def clear_history(db: Session = Depends(get_db)) -> HistoryDeleteResponse:
-    deleted = _delete_results(db, db.query(FactCheckResult).all())
-    # Drop requests that never produced a result as well
-    db.query(FactCheckRequest).delete(synchronize_session=False)
+def clear_history(client_id: str = Depends(get_client_id), db: Session = Depends(get_db)) -> HistoryDeleteResponse:
+    deleted = _delete_results(db, _client_results(db, client_id).all())
+    # Drop this client's requests that never produced a result as well
+    db.query(FactCheckRequest).filter(FactCheckRequest.client_id == client_id).delete(synchronize_session=False)
     db.commit()
     return HistoryDeleteResponse(deleted=deleted)
 
 
 @router.post("/fact-check/history/delete", response_model=HistoryDeleteResponse)
-def delete_history_items(body: HistoryDeleteRequest, db: Session = Depends(get_db)) -> HistoryDeleteResponse:
-    results = db.query(FactCheckResult).filter(FactCheckResult.id.in_(body.ids)).all()
+def delete_history_items(
+    body: HistoryDeleteRequest,
+    client_id: str = Depends(get_client_id),
+    db: Session = Depends(get_db),
+) -> HistoryDeleteResponse:
+    results = _client_results(db, client_id).filter(FactCheckResult.id.in_(body.ids)).all()
     return HistoryDeleteResponse(deleted=_delete_results(db, results))
+
+
+@router.post("/fact-check/lookup", response_model=list[VerdictLookupItem])
+@limiter.limit("60/minute")
+def lookup_verdicts(request: Request, body: VerdictLookupRequest, db: Session = Depends(get_db)) -> list[VerdictLookupItem]:
+    """Return already-analyzed verdicts for the given claims without running any new analysis."""
+    by_norm: dict[str, list[str]] = {}
+    for claim in body.claims:
+        by_norm.setdefault(_normalize_claim(claim[:2000]), []).append(claim)
+
+    rows = (
+        db.query(FactCheckRequest)
+        .options(joinedload(FactCheckRequest.result))
+        .filter(FactCheckRequest.claim_normalized.in_(by_norm), FactCheckRequest.status == "completed")
+        .order_by(FactCheckRequest.created_at.desc())
+        .all()
+    )
+
+    items: list[VerdictLookupItem] = []
+    for req in rows:
+        claims = by_norm.pop(req.claim_normalized, None)  # newest row per claim wins
+        if not claims or not req.result:
+            continue
+        for claim in claims:
+            items.append(VerdictLookupItem(
+                claim=claim,
+                result_id=req.result.id,
+                verdict=req.result.verdict,
+                verdict_label=_strip_dashes(req.result.verdict_label),
+            ))
+    return items
 
 
 @router.get("/fact-check/{result_id}", response_model=FactCheckResultOut)
@@ -215,7 +328,8 @@ def get_fact_check(result_id: str, db: Session = Depends(get_db)) -> FactCheckRe
 
 
 @router.post("/feedback", response_model=FeedbackResponse)
-def submit_feedback(body: FeedbackRequest, db: Session = Depends(get_db)) -> FeedbackResponse:
+@limiter.limit("30/minute")
+def submit_feedback(request: Request, body: FeedbackRequest, db: Session = Depends(get_db)) -> FeedbackResponse:
     result = db.query(FactCheckResult).filter_by(id=body.result_id).first()
     if not result:
         raise HTTPException(status_code=404, detail="Result not found")

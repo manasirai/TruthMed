@@ -32,10 +32,12 @@ def create_tables() -> None:
 def _add_missing_columns() -> None:
     # create_all() does not alter existing tables, so add columns introduced after the DB was created.
     columns = {c["name"] for c in inspect(engine).get_columns("fact_check_requests")}
-    if "claim_normalized" not in columns:
+    for name, sql_type in (("claim_normalized", "TEXT"), ("client_id", "VARCHAR(36)")):
+        if name in columns:
+            continue
         with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE fact_check_requests ADD COLUMN claim_normalized TEXT"))
+            conn.execute(text(f"ALTER TABLE fact_check_requests ADD COLUMN {name} {sql_type}"))
             conn.execute(text(
-                "CREATE INDEX IF NOT EXISTS ix_fact_check_requests_claim_normalized "
-                "ON fact_check_requests (claim_normalized)"
+                f"CREATE INDEX IF NOT EXISTS ix_fact_check_requests_{name} "
+                f"ON fact_check_requests ({name})"
             ))

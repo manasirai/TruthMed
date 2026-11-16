@@ -98,6 +98,17 @@ class HistoryDeleteResponse(BaseModel):
     deleted: int
 
 
+class VerdictLookupRequest(BaseModel):
+    claims: list[str] = Field(..., min_length=1, max_length=50)
+
+
+class VerdictLookupItem(BaseModel):
+    claim: str
+    result_id: str
+    verdict: str
+    verdict_label: str
+
+
 class FeedbackRequest(BaseModel):
     result_id: str
     rating: int = Field(..., ge=1, le=5)

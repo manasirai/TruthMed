@@ -1,5 +1,5 @@
 """
-TruthMed Backend  FastAPI application entry point.
+TruthMed Backend: FastAPI application entry point.
 
 Start with:
     cd backend
@@ -14,21 +14,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from app.api.fact_check import router as fact_check_router
 from app.api.organs import router as organs_router
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.db.database import create_tables
 from app.db.seed_organs import seed_organs
 from app.db.database import SessionLocal
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
-
-limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -59,8 +57,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type", "X-Client-Id"],
 )
 
 app.include_router(fact_check_router)

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlaskConical, AlertCircle } from 'lucide-react';
 import { ClaimInput } from '@/components/fact-check/ClaimInput';
 import { FactCheckResultView } from '@/components/fact-check/FactCheckResult';
@@ -48,9 +48,13 @@ function SavedFactCheck({ resultId }: { resultId: string }) {
 
 function NewFactCheck() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const incomingResult = location.state?.result as FactCheckResult | undefined;
+  // A claim handed over from another page (e.g. a card on the Myths page) to analyze right away
+  const incomingClaim = location.state?.claim as string | undefined;
 
-  const [state, setState] = useState<PageState>(incomingResult ? 'result' : 'idle');
+  const [state, setState] = useState<PageState>(incomingResult ? 'result' : incomingClaim ? 'loading' : 'idle');
   const [result, setResult] = useState<FactCheckResult | null>(incomingResult ?? null);
   const [currentClaim, setCurrentClaim] = useState('');
   const [apiError, setApiError] = useState('');
@@ -65,6 +69,7 @@ function NewFactCheck() {
     onSuccess: (data) => {
       setResult(data);
       setState('result');
+      queryClient.invalidateQueries({ queryKey: ['myth-verdicts'] });
       pet.stopWork('celebrate', 'Done! Here’s what I found.');
     },
     onError: (err: Error) => {
@@ -73,6 +78,16 @@ function NewFactCheck() {
       pet.stopWork('sad', 'Hmm, I couldn’t finish that one.');
     },
   });
+
+  const autoSubmitted = useRef(false);
+  useEffect(() => {
+    if (!incomingClaim || autoSubmitted.current) return;
+    autoSubmitted.current = true;
+    // Clear the handed-over claim so a page refresh doesn't run it again
+    navigate('.', { replace: true, state: null });
+    pet.work();
+    mutate(incomingClaim);
+  }, [incomingClaim, mutate, navigate]);
 
   function handleReset() {
     setState('idle');
@@ -99,7 +114,7 @@ function NewFactCheck() {
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Health Fact Checker</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                Submit any health claim for evidence-based analysis. We'll tell you what the medical literature actually says  including any uncertainty.
+                Submit any health claim for evidence-based analysis. We'll tell you what the medical literature actually says, including any uncertainty.
               </p>
             </div>
             <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-card-md">
