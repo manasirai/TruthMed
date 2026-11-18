@@ -3,7 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently -k -n backend,frontend -c green,cyan \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev": "concurrently -k -n model,backend,frontend -c magenta,green,cyan \"npm:dev:model\" \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:app": "concurrently -k -n backend,frontend -c green,cyan \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:model": "node scripts/dev-model.mjs",
     "dev:backend": "cd backend && uvicorn main:app --reload --port 8001",
     "dev:frontend": "npm --prefix frontend run dev"
   },
