@@ -1,3 +1,5 @@
+import asyncio
+import json
 import logging
 import re
 import unicodedata
@@ -14,6 +16,7 @@ from app.models.fact_check import (
     EvidenceSource,
     FactCheckRequest,
     FactCheckResult,
+    ModelPrediction,
     UserFeedback,
 )
 from app.schemas.fact_check import (
@@ -25,10 +28,13 @@ from app.schemas.fact_check import (
     FeedbackResponse,
     HistoryDeleteRequest,
     HistoryDeleteResponse,
+    ModelCheckOut,
     VerdictLookupItem,
     VerdictLookupRequest,
 )
+from app.services import ml_model
 from app.services.fact_checker import run_fact_check
+from app.services.labels import agreement
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["fact-check"])
@@ -51,6 +57,43 @@ def get_client_id(x_client_id: str = Header(default="")) -> str:
 def _strip_dashes(text: str) -> str:
     # Replace em dashes with a comma rather than a bare space, so the sentence keeps its punctuation
     return re.sub(r"\s*—\s*", ", ", text).strip()
+
+
+def _model_check_out(result: FactCheckResult) -> ModelCheckOut | None:
+    mp = result.model_prediction
+    if mp is None:
+        return None
+    try:
+        flags = json.loads(mp.red_flags_json or "[]")
+    except json.JSONDecodeError:
+        flags = []
+    return ModelCheckOut(
+        model_name=mp.model_name,
+        classification=mp.classification,
+        misinformation_score=mp.misinformation_score,
+        classifier_probability=mp.classifier_probability,
+        language=mp.language,
+        category=mp.category,
+        fact_status=mp.fact_status,
+        red_flags=flags,
+        agrees_with_verdict=agreement(result.verdict, mp.classification),
+    )
+
+
+def _clone_model_prediction(mp: ModelPrediction | None) -> ModelPrediction | None:
+    if mp is None:
+        return None
+    return ModelPrediction(
+        service_prediction_id=mp.service_prediction_id,
+        model_name=mp.model_name,
+        classification=mp.classification,
+        misinformation_score=mp.misinformation_score,
+        classifier_probability=mp.classifier_probability,
+        language=mp.language,
+        category=mp.category,
+        fact_status=mp.fact_status,
+        red_flags_json=mp.red_flags_json,
+    )
 
 
 def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
@@ -82,6 +125,7 @@ def _to_out(result: FactCheckResult, claim_text: str) -> FactCheckResultOut:
         ],
         retrieval_status=result.retrieval_status,
         analyzed_at=result.created_at,
+        model_check=_model_check_out(result),
     )
 
 
@@ -123,6 +167,7 @@ def _copy_result_for_client(cached: FactCheckRequest, body: FactCheckRequestSche
             )
             for s in src.sources
         ],
+        model_prediction=_clone_model_prediction(src.model_prediction),
     )
     return req
 
@@ -166,8 +211,11 @@ async def create_fact_check(
     db.commit()
     db.refresh(req)
 
-    # Run the pipeline
-    pipeline_result = await run_fact_check(body.claim)
+    # Run Claude and the trained model in parallel; the model never delays or fails the fact check
+    # beyond its own timeout, and returns None when it is unavailable.
+    pipeline_result, model_result = await asyncio.gather(
+        run_fact_check(body.claim), ml_model.predict(body.claim)
+    )
 
     now = datetime.now(timezone.utc)
     result = FactCheckResult(
@@ -198,6 +246,20 @@ async def create_fact_check(
             relevance_note=src["relevance_note"],
             source_tier=src.get("source_tier", "secondary"),
             position=i,
+        ))
+
+    if model_result is not None:
+        db.add(ModelPrediction(
+            result_id=result.id,
+            service_prediction_id=model_result.prediction_id,
+            model_name=model_result.model_name,
+            classification=model_result.classification,
+            misinformation_score=model_result.misinformation_score,
+            classifier_probability=model_result.classifier_probability,
+            language=model_result.language,
+            category=model_result.category,
+            fact_status=model_result.fact_status,
+            red_flags_json=json.dumps(model_result.red_flags, ensure_ascii=False),
         ))
 
     # Failed analyses (missing key, API error, parse error) are marked "error" so they are never reused

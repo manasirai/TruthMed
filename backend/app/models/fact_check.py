@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -56,6 +56,9 @@ class FactCheckResult(Base):
         "EvidenceSource", back_populates="result", cascade="all, delete-orphan"
     )
     request: Mapped["FactCheckRequest"] = relationship("FactCheckRequest", back_populates="result")
+    model_prediction: Mapped["ModelPrediction | None"] = relationship(
+        "ModelPrediction", back_populates="result", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 class EvidenceSource(Base):
@@ -72,6 +75,30 @@ class EvidenceSource(Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
     result: Mapped["FactCheckResult"] = relationship("FactCheckResult", back_populates="sources")
+
+
+class ModelPrediction(Base):
+    """What the trained model (training/ service) said about the same claim Claude analyzed."""
+
+    __tablename__ = "model_predictions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    result_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("fact_check_results.id"), nullable=False, unique=True, index=True
+    )
+    # ID in the model service's own log (training/data/predictions.jsonl)
+    service_prediction_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    model_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    classification: Mapped[str] = mapped_column(String(40), nullable=False)
+    misinformation_score: Mapped[float] = mapped_column(Float, nullable=False)
+    classifier_probability: Mapped[float] = mapped_column(Float, nullable=False)
+    language: Mapped[str] = mapped_column(String(20), default="")
+    category: Mapped[str] = mapped_column(String(20), default="")
+    fact_status: Mapped[str] = mapped_column(String(30), default="no_match")
+    red_flags_json: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    result: Mapped["FactCheckResult"] = relationship("FactCheckResult", back_populates="model_prediction")
 
 
 class UserFeedback(Base):

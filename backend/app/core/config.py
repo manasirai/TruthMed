@@ -25,6 +25,10 @@ class Settings(BaseSettings):
 
     brave_search_api_key: str = ""
 
+    # Trained misinformation model (the service in training/). Empty disables it.
+    ml_service_url: str = ""
+    ml_timeout_seconds: float = 20.0
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
@@ -36,6 +40,10 @@ class Settings(BaseSettings):
     @property
     def has_brave_key(self) -> bool:
         return bool(self.brave_search_api_key)
+
+    @property
+    def has_ml_service(self) -> bool:
+        return bool(self.ml_service_url.strip())
 
 
 settings = Settings()

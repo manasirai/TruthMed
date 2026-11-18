@@ -49,6 +49,25 @@ class EvidenceSourceOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class RedFlagOut(BaseModel):
+    code: str
+    reason: str
+
+
+class ModelCheckOut(BaseModel):
+    """Second opinion from the trained misinformation model. Not shown as the verdict."""
+
+    model_name: str
+    classification: str  # Reliable | Suspicious | Healthcare Misinformation
+    misinformation_score: float  # 0-100
+    classifier_probability: float  # 0-100
+    language: str
+    category: str
+    fact_status: str
+    red_flags: list[RedFlagOut]
+    agrees_with_verdict: bool | None  # None when either side has no clear verdict
+
+
 class FactCheckResultOut(BaseModel):
     id: str
     request_id: str
@@ -67,6 +86,7 @@ class FactCheckResultOut(BaseModel):
     sources: list[EvidenceSourceOut]
     retrieval_status: str
     analyzed_at: datetime
+    model_check: ModelCheckOut | None = None
 
     model_config = {"from_attributes": True}
 

@@ -71,4 +71,5 @@ def health():
         "status": "ok",
         "analysis_configured": settings.has_anthropic_key,
         "retrieval_configured": settings.has_brave_key,
+        "model_configured": settings.has_ml_service,
     }
